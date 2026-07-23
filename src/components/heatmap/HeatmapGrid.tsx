@@ -48,6 +48,19 @@ export function HeatmapGrid({
 
   const currentTheme = COLOR_THEMES[config.colorTheme] || COLOR_THEMES.emerald;
 
+  // Map themes to ambient background glow gradients
+  const AMBIENT_GLOWS: Record<string, string> = {
+    emerald: 'from-emerald-500/10 via-emerald-500/5 to-transparent',
+    obsidian: 'from-zinc-500/10 via-zinc-500/5 to-transparent',
+    sunset: 'from-amber-500/10 via-orange-500/5 to-transparent',
+    cyber: 'from-purple-500/10 via-cyan-500/5 to-transparent',
+    sapphire: 'from-blue-500/10 via-sky-500/5 to-transparent',
+    amethyst: 'from-purple-500/10 via-pink-500/5 to-transparent',
+    amber: 'from-amber-500/10 via-yellow-500/5 to-transparent',
+  };
+
+  const ambientGlow = AMBIENT_GLOWS[config.colorTheme] || AMBIENT_GLOWS.emerald;
+
   // Render Legend Scale
   const renderLegend = () => {
     if (!config.showLegend) return null;
@@ -84,6 +97,8 @@ export function HeatmapGrid({
 
   return (
     <div className={`relative flex flex-col w-full select-none ${className}`}>
+      {/* Ambient Glow Backdrop */}
+      <div className={`absolute -inset-4 bg-linear-to-tr ${ambientGlow} blur-2xl pointer-events-none rounded-3xl opacity-70 transition-all duration-500`} />
       {/* Zoom Toolbar */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { SpotlightCard } from '@/components/ui/SpotlightCard';
+import { Sparkline } from '@/components/ui/Sparkline';
 import { Button } from '@/components/ui/Button';
 import { HeatmapGrid } from '@/components/heatmap/HeatmapGrid';
 import { HeatmapData } from '@/types';
@@ -49,62 +51,74 @@ export default function DashboardOverviewPage() {
           </Link>
         </div>
 
-        {/* Metric Cards Grid */}
+        {/* Spotlight Metric Cards Grid with Sparklines */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.12)">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase text-zinc-400">Total Heatmaps</span>
               <Grid3X3 className="w-4 h-4 text-emerald-500" />
             </div>
-            <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mt-2">
-              {totalHeatmaps}
+            <div className="flex items-end justify-between mt-2">
+              <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                {totalHeatmaps}
+              </div>
+              <Sparkline data={[12, 18, 24, 28, 35, 39, totalHeatmaps]} color="#10b981" />
             </div>
-            <p className="text-[11px] text-emerald-500 font-mono mt-1 flex items-center gap-1">
+            <p className="text-[11px] text-emerald-500 font-mono mt-2 flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
               +4 created this month
             </p>
-          </Card>
+          </SpotlightCard>
 
-          <Card>
+          <SpotlightCard spotlightColor="rgba(59, 130, 246, 0.12)">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase text-zinc-400">Total Views</span>
               <Eye className="w-4 h-4 text-blue-500" />
             </div>
-            <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mt-2">
-              {formatNumber(totalViews)}
+            <div className="flex items-end justify-between mt-2">
+              <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                {formatNumber(totalViews)}
+              </div>
+              <Sparkline data={[4200, 5800, 8100, 11400, 14200, totalViews]} color="#3b82f6" />
             </div>
-            <p className="text-[11px] text-blue-500 font-mono mt-1 flex items-center gap-1">
+            <p className="text-[11px] text-blue-500 font-mono mt-2 flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
-              +24% increase vs last month
+              +24% vs last month
             </p>
-          </Card>
+          </SpotlightCard>
 
-          <Card>
+          <SpotlightCard spotlightColor="rgba(168, 85, 247, 0.12)">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase text-zinc-400">Active Projects</span>
               <Activity className="w-4 h-4 text-purple-500" />
             </div>
-            <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mt-2">
-              12
+            <div className="flex items-end justify-between mt-2">
+              <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                12
+              </div>
+              <Sparkline data={[4, 6, 8, 9, 10, 12]} color="#a855f7" />
             </div>
-            <p className="text-[11px] text-zinc-400 font-mono mt-1">
-              across 4 data sources
+            <p className="text-[11px] text-zinc-400 font-mono mt-2">
+              across 4 telemetry sources
             </p>
-          </Card>
+          </SpotlightCard>
 
-          <Card>
+          <SpotlightCard spotlightColor="rgba(245, 158, 11, 0.12)">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase text-zinc-400">Engagements</span>
               <Sparkles className="w-4 h-4 text-amber-500" />
             </div>
-            <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mt-2">
-              {formatNumber(totalLikes * 3.4)}
+            <div className="flex items-end justify-between mt-2">
+              <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                {formatNumber(totalLikes * 3.4)}
+              </div>
+              <Sparkline data={[450, 780, 1200, 1900, 2400, totalLikes * 3.4]} color="#f59e0b" />
             </div>
-            <p className="text-[11px] text-amber-500 font-mono mt-1 flex items-center gap-1">
+            <p className="text-[11px] text-amber-500 font-mono mt-2 flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
               98.4% uptime telemetry
             </p>
-          </Card>
+          </SpotlightCard>
         </div>
 
         {/* Heatmaps Section */}
@@ -124,7 +138,7 @@ export default function DashboardOverviewPage() {
 
           <div className="grid grid-cols-1 gap-6">
             {heatmaps.slice(0, 3).map((heatmap) => (
-              <Card key={heatmap.id} className="p-5 flex flex-col gap-4">
+              <SpotlightCard key={heatmap.id} className="p-5 flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-900">
                   <div>
                     <div className="flex items-center gap-2">
@@ -164,7 +178,7 @@ export default function DashboardOverviewPage() {
                 <div className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800">
                   <HeatmapGrid cells={heatmap.cells} config={heatmap.config} interactive={true} />
                 </div>
-              </Card>
+              </SpotlightCard>
             ))}
           </div>
         </div>
