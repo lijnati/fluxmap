@@ -21,7 +21,7 @@ export function EmbedModal({ isOpen, onClose, heatmap, onExportPNG, onExportSVG 
 
   const publicUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/h/${heatmap.id}`
-    : `https://heatmaphub.com/h/${heatmap.id}`;
+    : `https://fluxmap.com/h/${heatmap.id}`;
 
   const iframeSnippet = `<iframe src="${publicUrl}?embed=true" width="100%" height="320" frameborder="0" scrolling="no" style="border-radius: 12px; border: 1px solid #27272a;"></iframe>`;
 

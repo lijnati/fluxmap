@@ -1,8 +1,8 @@
 import { HeatmapData, UserProfile } from '@/types';
 import { SAMPLE_HEATMAPS, MOCK_USER_PROFILE } from './sample-data';
 
-const STORAGE_KEY_HEATMAPS = 'heatmap_hub_heatmaps_v1';
-const STORAGE_KEY_PROFILE = 'heatmap_hub_profile_v1';
+const STORAGE_KEY_HEATMAPS = 'fluxmap_heatmaps_v1';
+const STORAGE_KEY_PROFILE = 'fluxmap_profile_v1';
 
 export function getStoredHeatmaps(): HeatmapData[] {
   if (typeof window === 'undefined') return SAMPLE_HEATMAPS;

@@ -40,7 +40,7 @@ export default function LandingPage() {
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 text-xs font-mono text-zinc-600 dark:text-zinc-400 mb-6 backdrop-blur-xs shadow-2xs"
         >
           <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-          <span>Heatmap Hub 2.0 Released</span>
+          <span>Fluxmap 2.0 Released</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
         </motion.div>
 
@@ -64,7 +64,7 @@ export default function LandingPage() {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="mt-6 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed"
         >
-          Heatmap Hub turns complex behavioral data, website interactions, git velocity, and on-chain transactions into beautiful interactive heatmaps.
+          Fluxmap turns complex behavioral data, website interactions, git velocity, and on-chain transactions into beautiful interactive heatmaps.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -104,7 +104,7 @@ export default function LandingPage() {
                   <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 </div>
                 <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500 ml-2">
-                  live-sandbox.heatmaphub.com
+                  live-sandbox.fluxmap.com
                 </span>
               </div>
 
@@ -256,10 +256,10 @@ export default function LandingPage() {
       <footer className="border-t border-zinc-200 dark:border-zinc-800/80 bg-white/50 dark:bg-zinc-950/50 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-900 dark:text-zinc-100">Heatmap Hub</span>
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">Fluxmap</span>
             <span>— See patterns. Understand behavior.</span>
           </div>
-          <div>© 2026 Heatmap Hub. Open Source Inspired.</div>
+          <div>© 2026 Fluxmap. Open Source Inspired.</div>
         </div>
       </footer>
     </div>

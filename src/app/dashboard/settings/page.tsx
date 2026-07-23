@@ -94,12 +94,12 @@ export default function SettingsPage() {
                 <Key className="w-4 h-4 text-amber-500" />
                 API & Embed Keys
               </CardTitle>
-              <CardDescription>Use your API token to programmatically push telemetry cells into Heatmap Hub.</CardDescription>
+              <CardDescription>Use your API token to programmatically push telemetry cells into Fluxmap.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <Input
                 label="Secret Telemetry Key"
-                value="hh_live_9f8a2b3c4d5e6f7g8h9i0j"
+                value="flux_live_9f8a2b3c4d5e6f7g8h9i0j"
                 readOnly
                 className="font-mono text-xs"
               />

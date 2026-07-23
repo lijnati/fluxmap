@@ -26,7 +26,7 @@ export function Navbar() {
           </div>
           <div className="flex flex-col">
             <span className="font-bold text-sm text-zinc-900 dark:text-zinc-50 tracking-tight leading-none">
-              Heatmap<span className="text-zinc-500 font-normal">Hub</span>
+              Flux<span className="text-zinc-500 font-normal">map</span>
             </span>
             <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono leading-tight">
               Analytics

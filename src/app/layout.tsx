@@ -7,9 +7,9 @@ import { Navbar } from '@/components/layout/Navbar';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Heatmap Hub — Visualize activity. Understand patterns.',
-  description: 'Heatmap Hub turns complex data into beautiful interactive heatmaps for developers, web apps, and blockchain activity.',
-  keywords: ['Heatmap', 'Analytics', 'Developer Tools', 'GitHub Contribution', 'Data Visualization', 'Vercel', 'Next.js'],
+  title: 'Fluxmap — Visualize activity. Understand patterns.',
+  description: 'Fluxmap turns complex data into beautiful interactive heatmaps for developers, web apps, and blockchain activity.',
+  keywords: ['Fluxmap', 'Heatmap', 'Analytics', 'Developer Tools', 'GitHub Contribution', 'Data Visualization', 'Vercel', 'Next.js'],
 };
 
 export default function RootLayout({
