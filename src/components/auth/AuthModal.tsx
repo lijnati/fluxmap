@@ -56,7 +56,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   const handleDemoSignIn = async () => {
-    setEmail('developer@heatmaphub.com');
+    setEmail('developer@fluxmap.com');
     setPassword('demo123456');
     setName('Developer User');
     setMode('signin');
@@ -66,7 +66,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={mode === 'signin' ? 'Sign In to Heatmap Hub' : 'Create an Account'}
+      title={mode === 'signin' ? 'Sign In to Fluxmap' : 'Create an Account'}
       description="Access your team telemetry, interactive heatmaps, and AI behavioral insights."
       className="max-w-md"
     >
@@ -119,7 +119,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <Input
             label="Email Address"
             type="email"
-            placeholder="developer@heatmaphub.com"
+            placeholder="developer@fluxmap.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

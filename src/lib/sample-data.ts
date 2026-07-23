@@ -128,7 +128,7 @@ export const MOCK_USER_PROFILE: UserProfile = {
   bio: 'Full-stack Architect & Open Source Contributor. Building high-performance developer tools and data visualizers.',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
   location: 'San Francisco, CA',
-  website: 'https://heatmaphub.com',
+  website: 'https://fluxmap.com',
   githubHandle: 'developer',
   heatmapsCount: 42,
   totalViews: 148500,

@@ -97,7 +97,7 @@ export default function PublicHeatmapPage() {
         </div>
 
         {/* Heatmap Grid Render */}
-        <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
+        <div id="heatmap-shared-canvas" className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
           <HeatmapGrid cells={heatmap.cells} config={heatmap.config} interactive={true} />
         </div>
 
@@ -119,8 +119,7 @@ export default function PublicHeatmapPage() {
         isOpen={isEmbedModalOpen}
         onClose={() => setIsEmbedModalOpen(false)}
         heatmap={heatmap}
-        onExportPNG={() => alert('PNG asset generation initiated.')}
-        onExportSVG={() => alert('SVG vector downloaded.')}
+        canvasContainerId="heatmap-shared-canvas"
       />
     </div>
   );

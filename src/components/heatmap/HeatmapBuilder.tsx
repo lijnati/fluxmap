@@ -9,15 +9,29 @@ import { ColorScalePicker } from './ColorScalePicker';
 import { HeatmapGrid } from './HeatmapGrid';
 import { HeatmapData, HeatmapConfig, ColorTheme, VisibilityType, HeatmapType, DataCell } from '@/types';
 import { useSession } from '@/lib/auth-client';
+import { fetchGitHubActivity } from '@/lib/github-sync';
+import { downloadPNG, downloadSVG, downloadCSV } from '@/lib/export';
 import {
   generateGitHubSampleData,
   generateWebsiteAnalyticsSampleData,
   generateBlockchainSampleData,
   generateProductivitySampleData,
-  SAMPLE_TEMPLATES
 } from '@/lib/sample-data';
 import { saveHeatmap } from '@/lib/storage';
-import { Sliders, Palette, Database, Eye, Save, Sparkles, RefreshCw, Share2 } from 'lucide-react';
+import {
+  Sliders,
+  Palette,
+  Database,
+  Eye,
+  Save,
+  RefreshCw,
+  Download,
+  FileSpreadsheet,
+  Image as ImageIcon,
+  GitBranch,
+  Check,
+  Sparkles
+} from 'lucide-react';
 
 export interface HeatmapBuilderProps {
   initialData?: HeatmapData;
@@ -25,6 +39,8 @@ export interface HeatmapBuilderProps {
 
 export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const activeUser = session?.user;
 
   // Initial State
   const [title, setTitle] = useState<string>(initialData?.title || 'My New Heatmap 2026');
@@ -33,7 +49,7 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
   );
   const [type, setType] = useState<HeatmapType>(initialData?.type || 'github');
   const [visibility, setVisibility] = useState<VisibilityType>(initialData?.visibility || 'public');
-  
+
   const [config, setConfig] = useState<HeatmapConfig>(
     initialData?.config || {
       columns: 52,
@@ -55,7 +71,11 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
 
   const [activeTab, setActiveTab] = useState<'style' | 'data' | 'settings'>('style');
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [jsonInput, setJsonInput] = useState<string>('');
+  
+  // GitHub Sync State
+  const [githubUsername, setGithubUsername] = useState<string>('');
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
   // Handle Preset Data Swap
   const handleTypeChange = (newType: HeatmapType) => {
@@ -107,12 +127,32 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
     }
   };
 
-  const handleRegenerateRandomData = () => {
-    handleTypeChange(type);
-  };
+  // GitHub Importer Action
+  const handleGitHubSync = async () => {
+    if (!githubUsername.trim()) return;
+    setIsSyncing(true);
+    setSyncStatus('Fetching GitHub telemetry...');
 
-  const { data: session } = useSession();
-  const activeUser = session?.user;
+    try {
+      const result = await fetchGitHubActivity(githubUsername);
+      setCells(result.cells);
+      setType('github');
+      setTitle(`${result.name || result.username}'s GitHub Contributions`);
+      setDescription(`Real-time GitHub activity graph for @${result.username} (${result.totalContributions} total contributions).`);
+      setConfig((prev) => ({
+        ...prev,
+        columns: 52,
+        rows: 7,
+        colorTheme: 'emerald',
+      }));
+      setSyncStatus(`Successfully synced ${result.totalContributions} contributions!`);
+      setTimeout(() => setSyncStatus(null), 3000);
+    } catch (e: any) {
+      setSyncStatus('GitHub sync failed. Using fallback matrix.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleSave = () => {
     setIsSaving(true);
@@ -169,8 +209,8 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Controls & Configuration (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-5">
-          {/* Preset Template Selector */}
-          <div className="flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+          {/* Preset Tab Switcher */}
+          <div className="flex items-center gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
             <button
               type="button"
               onClick={() => setActiveTab('style')}
@@ -209,13 +249,122 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
             </button>
           </div>
 
-          {/* Style & Theme Tab */}
+          {/* Dataset Engine Tab (with GitHub Live Sync Importer) */}
+          {activeTab === 'data' && (
+            <div className="flex flex-col gap-5">
+              {/* Live GitHub Importer Box */}
+              <Card className="border-emerald-500/30 bg-emerald-500/5">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2 text-emerald-950 dark:text-emerald-100">
+                    <GitBranch className="w-4 h-4 text-emerald-500" />
+                    Live GitHub Activity Sync
+                  </CardTitle>
+                  <CardDescription>
+                    Import real-time contribution telemetry from any public GitHub profile.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="Enter username (e.g. torvalds, shadcn)"
+                      value={githubUsername}
+                      onChange={(e) => setGithubUsername(e.target.value)}
+                      className="font-mono text-xs"
+                    />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={handleGitHubSync}
+                      isLoading={isSyncing}
+                    >
+                      Sync
+                    </Button>
+                  </div>
+                  {syncStatus && (
+                    <p className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+                      {syncStatus}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Data Templates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Preset Data Templates</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleTypeChange('github')}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        type === 'github'
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold'
+                          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
+                      }`}
+                    >
+                      <div className="text-xs">GitHub Activity</div>
+                      <div className="text-[10px] opacity-75">52 Wk Calendar</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTypeChange('website')}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        type === 'website'
+                          ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
+                      }`}
+                    >
+                      <div className="text-xs">Website Visitor</div>
+                      <div className="text-[10px] opacity-75">24h x 7d Matrix</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTypeChange('blockchain')}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        type === 'blockchain'
+                          ? 'border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold'
+                          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
+                      }`}
+                    >
+                      <div className="text-xs">Blockchain Tx</div>
+                      <div className="text-[10px] opacity-75">Gas / Contract</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTypeChange('productivity')}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        type === 'productivity'
+                          ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold'
+                          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
+                      }`}
+                    >
+                      <div className="text-xs">Productivity</div>
+                      <div className="text-[10px] opacity-75">16 Wk Sprint</div>
+                    </button>
+                  </div>
+
+                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
+                    <span className="text-xs text-zinc-500">Regenerate Values</span>
+                    <Button variant="outline" size="sm" onClick={() => handleTypeChange(type)}>
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Shuffle
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Style Tab */}
           {activeTab === 'style' && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Color Scale & Palette</CardTitle>
                 <CardDescription>
-                  Choose a harmonious color gradient designed for light and dark themes.
+                  Choose a color gradient designed for light and dark themes.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-5">
@@ -247,88 +396,7 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
                         className="rounded dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700"
                       />
                     </label>
-                    <label className="flex items-center justify-between text-xs text-zinc-700 dark:text-zinc-300 cursor-pointer">
-                      <span>Enable Hover Tooltips</span>
-                      <input
-                        type="checkbox"
-                        checked={config.showTooltips}
-                        onChange={(e) => setConfig((prev) => ({ ...prev, showTooltips: e.target.checked }))}
-                        className="rounded dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700"
-                      />
-                    </label>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Dataset Engine Tab */}
-          {activeTab === 'data' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Preset Data Templates</CardTitle>
-                <CardDescription>
-                  Select a predefined dataset type or generate randomized sample data.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleTypeChange('github')}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      type === 'github'
-                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
-                    }`}
-                  >
-                    <div className="text-xs">GitHub Activity</div>
-                    <div className="text-[10px] opacity-75">52 Wk Calendar</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTypeChange('website')}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      type === 'website'
-                        ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
-                    }`}
-                  >
-                    <div className="text-xs">Website Visitor</div>
-                    <div className="text-[10px] opacity-75">24h x 7d Matrix</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTypeChange('blockchain')}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      type === 'blockchain'
-                        ? 'border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
-                    }`}
-                  >
-                    <div className="text-xs">Blockchain Tx</div>
-                    <div className="text-[10px] opacity-75">Gas / Contract</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleTypeChange('productivity')}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      type === 'productivity'
-                        ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 text-zinc-700 dark:text-zinc-300'
-                    }`}
-                  >
-                    <div className="text-xs">Productivity</div>
-                    <div className="text-[10px] opacity-75">16 Wk Sprint</div>
-                  </button>
-                </div>
-
-                <div className="pt-3 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">Regenerate Data Values</span>
-                  <Button variant="outline" size="sm" onClick={handleRegenerateRandomData}>
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Shuffle
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -339,9 +407,6 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Grid Controls</CardTitle>
-                <CardDescription>
-                  Adjust matrix size, padding gaps, cell dimensions, and corner curvature.
-                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -376,119 +441,75 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-3 pt-2">
-                  <div>
-                    <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
-                      Cell Size
-                    </label>
-                    <Input
-                      type="number"
-                      value={config.cellSize}
-                      onChange={(e) =>
-                        setConfig((prev) => ({ ...prev, cellSize: parseInt(e.target.value) || 10 }))
-                      }
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
-                      Cell Gap
-                    </label>
-                    <Input
-                      type="number"
-                      value={config.cellGap}
-                      onChange={(e) =>
-                        setConfig((prev) => ({ ...prev, cellGap: parseInt(e.target.value) || 2 }))
-                      }
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
-                      Border Radius
-                    </label>
-                    <Input
-                      type="number"
-                      value={config.borderRadius}
-                      onChange={(e) =>
-                        setConfig((prev) => ({ ...prev, borderRadius: parseInt(e.target.value) || 0 }))
-                      }
-                      className="h-8 text-xs"
-                    />
-                  </div>
-                </div>
               </CardContent>
             </Card>
           )}
 
-          {/* General Metadata Card */}
+          {/* General Metadata */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Metadata & Visibility</CardTitle>
+              <CardTitle className="text-base">Metadata</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <Input
                 label="Heatmap Title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. GitHub Activity 2026"
               />
               <Input
                 label="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Brief summary of what this dataset visualizes..."
               />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                  Privacy Settings
-                </label>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setVisibility('public')}
-                    className={`flex-1 py-1.5 px-3 rounded-lg text-xs border font-medium transition-all ${
-                      visibility === 'public'
-                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                        : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
-                    }`}
-                  >
-                    Public
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setVisibility('private')}
-                    className={`flex-1 py-1.5 px-3 rounded-lg text-xs border font-medium transition-all ${
-                      visibility === 'private'
-                        ? 'border-zinc-700 bg-zinc-800 text-zinc-100'
-                        : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
-                    }`}
-                  >
-                    Private
-                  </button>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column: Live Interactive Canvas Preview (7 cols) */}
+        {/* Right Column: Canvas Preview + 4K Export Controls (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-5">
           <Card className="p-6 bg-zinc-950/90 text-zinc-50 border-zinc-800 shadow-xl overflow-hidden min-h-[500px] flex flex-col justify-between">
             <div>
-              {/* Preview Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80 mb-6">
+              {/* Preview Header with 4K Export Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-800/80 gap-3 mb-6">
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">
                     Live Preview Canvas
                   </span>
                 </div>
-                <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-400">
-                  <span className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800">
-                    {visibility.toUpperCase()}
-                  </span>
+
+                {/* 4K High-Res Export Shortcuts */}
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => downloadPNG('builder-canvas-grid', `${title.toLowerCase().replace(/\s+/g, '-')}-4k.png`)}
+                    className="h-7 text-[11px] px-2 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
+                    title="Export 4K High-Res PNG"
+                  >
+                    <ImageIcon className="w-3 h-3 text-emerald-400" />
+                    4K PNG
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => downloadSVG('builder-canvas-grid', `${title.toLowerCase().replace(/\s+/g, '-')}.svg`)}
+                    className="h-7 text-[11px] px-2 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
+                    title="Export Scalable SVG Vector"
+                  >
+                    <Download className="w-3 h-3 text-blue-400" />
+                    SVG
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => downloadCSV(cells, `${title.toLowerCase().replace(/\s+/g, '-')}.csv`)}
+                    className="h-7 text-[11px] px-2 text-zinc-300 border-zinc-700 hover:bg-zinc-800"
+                    title="Export CSV Telemetry Spreadsheet"
+                  >
+                    <FileSpreadsheet className="w-3 h-3 text-amber-400" />
+                    CSV
+                  </Button>
                 </div>
               </div>
 
@@ -498,16 +519,16 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
                 <p className="text-xs text-zinc-400 mt-1 max-w-xl">{description}</p>
               </div>
 
-              {/* Actual Heatmap Grid Engine Rendering */}
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80">
+              {/* Heatmap Canvas Container */}
+              <div id="builder-canvas-grid" className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
                 <HeatmapGrid cells={cells} config={config} interactive={true} />
               </div>
             </div>
 
-            {/* Canvas Footer Status */}
+            {/* Canvas Footer */}
             <div className="pt-4 mt-6 border-t border-zinc-900 flex items-center justify-between text-xs text-zinc-500 font-mono">
-              <span>{cells.length} Total Data Cells</span>
-              <span>Theme: {config.colorTheme.toUpperCase()}</span>
+              <span>{cells.length} Total Telemetry Slots</span>
+              <span>Exporter Ready (4K DPI)</span>
             </div>
           </Card>
         </div>
