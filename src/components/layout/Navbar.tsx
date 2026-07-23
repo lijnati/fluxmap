@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/Button';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useSession, signOut } from '@/lib/auth-client';
-import { Grid3X3, Sun, Moon, Plus, Compass, LayoutDashboard, User, LogIn, LogOut } from 'lucide-react';
+import { Grid3X3, Sun, Moon, Plus, Compass, LayoutDashboard, User, LogIn, LogOut, BookOpen } from 'lucide-react';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -69,6 +69,18 @@ export function Navbar() {
             >
               <Compass className="w-3.5 h-3.5" />
               Explore Gallery
+            </Link>
+
+            <Link
+              href="/docs"
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                pathname?.startsWith('/docs')
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              Docs
             </Link>
 
             {userProfileHref && (
