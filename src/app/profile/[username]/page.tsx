@@ -8,23 +8,52 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { HeatmapGrid } from '@/components/heatmap/HeatmapGrid';
 import { UserProfile, HeatmapData } from '@/types';
-import { MOCK_USER_PROFILE, SAMPLE_HEATMAPS } from '@/lib/sample-data';
 import { getStoredHeatmaps, getStoredUserProfile } from '@/lib/storage';
+import { useSession } from '@/lib/auth-client';
 import { MapPin, Globe, Calendar, Eye, Grid3X3, Users, ExternalLink, Check, Plus } from 'lucide-react';
 
 export default function UserProfilePage() {
   const params = useParams();
-  const username = (params?.username as string) || 'yegetaneh';
+  const usernameParam = (params?.username as string) || 'developer';
+  const { data: session } = useSession();
 
-  const [profile, setProfile] = useState<UserProfile>(MOCK_USER_PROFILE);
+  const [profile, setProfile] = useState<UserProfile>({
+    id: 'usr_dynamic',
+    name: 'Developer Profile',
+    handle: usernameParam,
+    bio: 'Full-stack Architect & Open Source Contributor. Building high-performance developer tools.',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+    location: 'San Francisco, CA',
+    website: 'https://github.com',
+    heatmapsCount: 12,
+    totalViews: 48500,
+    followersCount: 340,
+    followingCount: 120,
+    joinedDate: 'January 2026'
+  });
+
   const [userHeatmaps, setUserHeatmaps] = useState<HeatmapData[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
-    setProfile(getStoredUserProfile());
+    const storedProfile = getStoredUserProfile();
+    const activeUser = session?.user;
+
+    const displayName = activeUser?.name || storedProfile.name || 'Developer';
+    const displayHandle = activeUser?.name ? activeUser.name.toLowerCase().replace(/\s+/g, '') : (activeUser?.email?.split('@')[0] || usernameParam);
+    const displayAvatar = activeUser?.image || storedProfile.avatarUrl;
+
+    setProfile((prev) => ({
+      ...prev,
+      name: displayName,
+      handle: displayHandle,
+      avatarUrl: displayAvatar,
+      bio: storedProfile.bio || prev.bio,
+    }));
+
     const all = getStoredHeatmaps();
     setUserHeatmaps(all);
-  }, [username]);
+  }, [usernameParam, session]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -78,7 +107,7 @@ export default function UserProfilePage() {
               onClick={() => setIsFollowing(!isFollowing)}
             >
               {isFollowing ? <Check className="w-4 h-4 text-emerald-400" /> : <Plus className="w-4 h-4" />}
-              {isFollowing ? 'Following' : 'Follow @yegetaneh'}
+              {isFollowing ? 'Following' : `Follow @${profile.handle}`}
             </Button>
           </div>
         </div>
@@ -91,7 +120,7 @@ export default function UserProfilePage() {
           </div>
           <div>
             <span className="text-[10px] uppercase text-zinc-500">Total Views</span>
-            <div className="text-xl font-bold text-white mt-0.5">148.5k</div>
+            <div className="text-xl font-bold text-white mt-0.5">48.5k</div>
           </div>
           <div>
             <span className="text-[10px] uppercase text-zinc-500">Followers</span>

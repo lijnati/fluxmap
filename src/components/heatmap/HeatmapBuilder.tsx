@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { ColorScalePicker } from './ColorScalePicker';
 import { HeatmapGrid } from './HeatmapGrid';
 import { HeatmapData, HeatmapConfig, ColorTheme, VisibilityType, HeatmapType, DataCell } from '@/types';
+import { useSession } from '@/lib/auth-client';
 import {
   generateGitHubSampleData,
   generateWebsiteAnalyticsSampleData,
@@ -110,6 +111,9 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
     handleTypeChange(type);
   };
 
+  const { data: session } = useSession();
+  const activeUser = session?.user;
+
   const handleSave = () => {
     setIsSaving(true);
     const newId = initialData?.id || `h_${Date.now()}`;
@@ -119,10 +123,10 @@ export function HeatmapBuilder({ initialData }: HeatmapBuilderProps) {
       description,
       type,
       visibility,
-      ownerId: initialData?.ownerId || 'usr_1',
-      ownerName: initialData?.ownerName || 'Yegetaneh D.',
-      ownerAvatar: initialData?.ownerAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-      ownerHandle: initialData?.ownerHandle || 'yegetaneh',
+      ownerId: initialData?.ownerId || activeUser?.id || 'usr_1',
+      ownerName: initialData?.ownerName || activeUser?.name || activeUser?.email?.split('@')[0] || 'Developer',
+      ownerAvatar: initialData?.ownerAvatar || activeUser?.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      ownerHandle: initialData?.ownerHandle || (activeUser?.name ? activeUser.name.toLowerCase().replace(/\s+/g, '') : 'developer'),
       createdAt: initialData?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       viewsCount: initialData?.viewsCount || 1,

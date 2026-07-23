@@ -56,9 +56,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   const handleDemoSignIn = async () => {
-    setEmail('yegetaneh@heatmaphub.com');
+    setEmail('developer@heatmaphub.com');
     setPassword('demo123456');
-    setName('Yegetaneh D.');
+    setName('Developer User');
     setMode('signin');
   };
 

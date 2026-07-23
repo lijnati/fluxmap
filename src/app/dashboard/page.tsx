@@ -9,10 +9,12 @@ import { HeatmapGrid } from '@/components/heatmap/HeatmapGrid';
 import { HeatmapData } from '@/types';
 import { getStoredHeatmaps } from '@/lib/storage';
 import { formatNumber } from '@/lib/utils';
+import { useSession } from '@/lib/auth-client';
 import { Grid3X3, Eye, TrendingUp, Plus, Sparkles, Share2, ExternalLink, Activity } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
   const [heatmaps, setHeatmaps] = useState<HeatmapData[]>([]);
+  const { data: session } = useSession();
 
   useEffect(() => {
     setHeatmaps(getStoredHeatmaps());
@@ -21,6 +23,8 @@ export default function DashboardOverviewPage() {
   const totalHeatmaps = heatmaps.length;
   const totalViews = heatmaps.reduce((acc, h) => acc + h.viewsCount, 0);
   const totalLikes = heatmaps.reduce((acc, h) => acc + h.likesCount, 0);
+
+  const userName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Developer';
 
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)]">
@@ -34,7 +38,7 @@ export default function DashboardOverviewPage() {
               Dashboard Overview
             </h1>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Welcome back, Yegetaneh. Here is your team's visual activity telemetry.
+              Welcome back, <span className="font-semibold text-zinc-800 dark:text-zinc-200">{userName}</span>. Here is your team's visual activity telemetry.
             </p>
           </div>
           <Link href="/dashboard/create">

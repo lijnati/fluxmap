@@ -9,10 +9,13 @@ import { HeatmapGrid } from '@/components/heatmap/HeatmapGrid';
 import { SAMPLE_TEMPLATES } from '@/lib/sample-data';
 import { HeatmapTemplate, HeatmapData } from '@/types';
 import { saveHeatmap } from '@/lib/storage';
+import { useSession } from '@/lib/auth-client';
 import { Sparkles, ArrowRight, Layers } from 'lucide-react';
 
 export default function TemplatesPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const activeUser = session?.user;
 
   const handleUseTemplate = (template: HeatmapTemplate) => {
     const newHeatmap: HeatmapData = {
@@ -21,10 +24,10 @@ export default function TemplatesPage() {
       description: template.description,
       type: template.type,
       visibility: 'public',
-      ownerId: 'usr_1',
-      ownerName: 'Yegetaneh D.',
-      ownerAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-      ownerHandle: 'yegetaneh',
+      ownerId: activeUser?.id || 'usr_1',
+      ownerName: activeUser?.name || activeUser?.email?.split('@')[0] || 'Developer',
+      ownerAvatar: activeUser?.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      ownerHandle: activeUser?.name ? activeUser.name.toLowerCase().replace(/\s+/g, '') : 'developer',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       viewsCount: 1,
