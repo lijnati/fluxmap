@@ -4,7 +4,13 @@ import { prisma } from '@/lib/db';
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || 'heatmap_hub_secret_key_2026_super_secure_98765',
-  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:6767',
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || 'http://localhost:6767',
+    'http://localhost:6767',
+    'http://localhost:3000',
+    'http://127.0.0.1:6767',
+  ],
   database: prismaAdapter(prisma, {
     provider: 'sqlite',
   }),
