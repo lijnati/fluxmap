@@ -16,6 +16,11 @@ export function Navbar() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const { data: session } = useSession();
+  const user = session?.user;
+
+  const userProfileHref = user
+    ? `/profile/${user.name ? user.name.toLowerCase().replace(/\s+/g, '') : 'user'}`
+    : null;
 
   useEffect(() => {
     setMounted(true);
@@ -66,17 +71,19 @@ export function Navbar() {
               Explore Gallery
             </Link>
 
-            <Link
-              href="/profile/yegetaneh"
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-                pathname?.startsWith('/profile')
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              Profile
-            </Link>
+            {userProfileHref && (
+              <Link
+                href={userProfileHref}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
+                  pathname?.startsWith('/profile')
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                Profile
+              </Link>
+            )}
           </nav>
 
           {/* Right Action Bar */}
@@ -91,13 +98,29 @@ export function Navbar() {
               </button>
             )}
 
-            {session?.user ? (
+            {user ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-zinc-600 dark:text-zinc-400 hidden sm:inline">
-                  {session.user.name || session.user.email}
-                </span>
-                <Button variant="ghost" size="sm" onClick={() => signOut()}>
-                  <LogOut className="w-4 h-4" />
+                <Link
+                  href={userProfileHref || '#'}
+                  className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                >
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name || 'User'}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 flex items-center justify-center text-[10px] font-bold">
+                      {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-xs font-medium text-zinc-800 dark:text-zinc-200 max-w-[120px] truncate">
+                    {user.name || user.email?.split('@')[0]}
+                  </span>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={() => signOut()} title="Sign Out">
+                  <LogOut className="w-4 h-4 text-zinc-500 hover:text-rose-500" />
                 </Button>
               </div>
             ) : (
