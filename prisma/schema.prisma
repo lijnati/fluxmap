@@ -1,0 +1,46 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  avatar        String?
+  handle        String    @unique @default("developer")
+  bio           String?
+  createdAt     DateTime  @default(now())
+  heatmaps      Heatmap[]
+}
+
+model Heatmap {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  type        String   @default("github")
+  visibility  String   @default("public")
+  config      String   // JSON stringified HeatmapConfig
+  data        String   // JSON stringified DataCell[]
+  tags        String   @default("[]")
+  viewsCount  Int      @default(0)
+  likesCount  Int      @default(0)
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  views       View[]
+}
+
+model View {
+  id        String   @id @default(cuid())
+  heatmapId String
+  heatmap   Heatmap  @relation(fields: [heatmapId], references: [id], onDelete: Cascade)
+  country   String?
+  ipHash    String?
+  timestamp DateTime @default(now())
+}
